@@ -10,8 +10,11 @@ def user_func(update):
         user = TelegramUserModel(
             chat_id=update.effective_user.id, 
             username=update.effective_user.username,
-            full_name=update.effective_user.full_name
+            full_name=update.effective_user.full_name,
+            is_active=True
         )
+        qazo = QazoModel.objects.create()
+        user.qazo = qazo
         user.save()
     return user
 

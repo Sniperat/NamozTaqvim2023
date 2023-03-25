@@ -3,10 +3,17 @@ from datetime import datetime, timedelta
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from main.models import RegionModel, TelegramUserModel
 import asyncio
-
+import trio
+import time
 current_time = datetime.now().time()
 
 class Command(BotBase):
+
+    async def sent_msg(self, chat_id, reply_markup, text_me):
+        app= self.application
+        await app.bot.send_message(chat_id=chat_id, text=text_me
+                                     , reply_markup=reply_markup)
+        time.sleep(0.1)
 
     def handle(self, *args, **kwargs):
         app = self.application
@@ -25,12 +32,18 @@ class Command(BotBase):
             if current_time.hour == bomdod_time.hour and current_time.minute == bomdod_time.minute:
                 for user in TelegramUserModel.objects.filter(region=region):
                     try:
-                        asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
-                                     'Бомдод вақтига 5 дақиқа қолди\n\nОғиз ёпиш дуоси: Навайту ан асума совма шахри ' +
-                                     'рамазона минал фажри илал '
-                                     'мағриби, холисан лиллахи таъала. '
+                        text_me = 'Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'\
+                                     'Бомдод вақтига 5 дақиқа қолди\n\nОғиз ёпиш дуоси: Навайту ан асума совма шахри ' \
+                                     'рамазона минал фажри илал '\
+                                     'мағриби, холисан лиллахи таъала. '\
                                      'Аллоҳу акбар!\n\n'
-                                     , reply_markup=reply_markup))
+                        trio.run(self.sent_msg, user.chat_id, reply_markup, text_me)
+                        # asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
+                        #              'Бомдод вақтига 5 дақиқа қолди\n\nОғиз ёпиш дуоси: Навайту ан асума совма шахри ' +
+                        #              'рамазона минал фажри илал '
+                        #              'мағриби, холисан лиллахи таъала. '
+                        #              'Аллоҳу акбар!\n\n'
+                        #              , reply_markup=reply_markup))
                     except:
                         user.is_active = False
                         user.save()
@@ -40,11 +53,16 @@ class Command(BotBase):
             if current_time.hour == shom_time.hour and current_time.minute == shom_time.minute:
                 for user in TelegramUserModel.objects.filter(region=region):
                     try:
-                        asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
-                                     'Шом вақтига 5 дақиқа қолди\n\nОғиз очиш дуоси: Аллоҳумма лака сумту ва бика ' +
-                                     'аманту ва ъалайка таваккалту ва ъала ризқика афтарту, '
+                        text_me = 'Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n' \
+                                     'Шом вақтига 5 дақиқа қолди\n\nОғиз очиш дуоси: Аллоҳумма лака сумту ва бика ' \
+                                     'аманту ва ъалайка таваккалту ва ъала ризқика афтарту, '\
                                      'фағфирли ва ғоффарума қоддамту ва ма аххорту. Амийн\n\n'
-                                     , reply_markup=reply_markup))
+                        trio.run(self.sent_msg, user.chat_id, reply_markup, text_me)
+                        # asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
+                        #              'Шом вақтига 5 дақиқа қолди\n\nОғиз очиш дуоси: Аллоҳумма лака сумту ва бика ' +
+                        #              'аманту ва ъалайка таваккалту ва ъала ризқика афтарту, '
+                        #              'фағфирли ва ғоффарума қоддамту ва ма аххорту. Амийн\n\n'
+                        #              , reply_markup=reply_markup))
                     except:
                         user.is_active = False
                         user.save()
@@ -61,9 +79,11 @@ class Command(BotBase):
             if current_time.hour == bomdod_time.hour and current_time.minute == bomdod_time.minute:
                 for user in TelegramUserModel.objects.filter(region=region):
                     try:
-                        asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
-                                     'Бомдод вақти бўлди'
-                                     , reply_markup=reply_markup))
+                        text_me = 'Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\nБомдод вақти бўлди'
+                        trio.run(self.sent_msg, user.chat_id, reply_markup, text_me)
+                        # asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
+                        #              'Бомдод вақти бўлди'
+                        #              , reply_markup=reply_markup))
                         qazo = user.qazo
                         qazo.bomdod +=1
                         qazo.save()
@@ -78,14 +98,18 @@ class Command(BotBase):
             peshin_time = region.solat_times.peshin
             if current_time.hour == peshin_time.hour and current_time.minute == peshin_time.minute:
                 for user in TelegramUserModel.objects.filter(region=region):
+                    print(user.region.name)
                     try:
-                        asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
-                                     'Пешин вақти бўлди'
-                                     , reply_markup=reply_markup))
+                        text_me = 'Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\nПешин вақти бўлди'
+                        trio.run(self.sent_msg, user.chat_id, reply_markup, text_me)
+                        # asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
+                        #              'Пешин вақти бўлди'
+                        #              , reply_markup=reply_markup))
                         qazo = user.qazo
                         qazo.peshin +=1
                         qazo.save()
                     except:
+                        print(user.region.name, 'musur')
                         user.is_active = False
                         user.save()
 
@@ -97,9 +121,11 @@ class Command(BotBase):
             if current_time.hour == asr_time.hour and current_time.minute == asr_time.minute:
                 for user in TelegramUserModel.objects.filter(region=region):
                     try:
-                        asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
-                                     'Аср вақти бўлди'
-                                     , reply_markup=reply_markup))
+                        text_me = 'Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\nАср вақти бўлди'
+                        trio.run(self.sent_msg, user.chat_id, reply_markup, text_me)
+                        # asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
+                        #              'Аср вақти бўлди'
+                        #              , reply_markup=reply_markup))
                         qazo = user.qazo
                         qazo.asr +=1
                         qazo.save()
@@ -115,9 +141,11 @@ class Command(BotBase):
             if current_time.hour == shom_time.hour and current_time.minute == shom_time.minute:
                 for user in TelegramUserModel.objects.filter(region=region):
                     try:
-                        asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
-                                     'Шом вақти бўлди'
-                                     , reply_markup=reply_markup))
+                        text_me = 'Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\nШом вақти бўлди'
+                        trio.run(self.sent_msg, user.chat_id, reply_markup, text_me)
+                        # asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
+                        #              'Шом вақти бўлди'
+                        #              , reply_markup=reply_markup))
                         qazo = user.qazo
                         qazo.shom +=1
                         qazo.save()
@@ -133,14 +161,17 @@ class Command(BotBase):
             if current_time.hour == xufton_time.hour and current_time.minute == xufton_time.minute:
                 for user in TelegramUserModel.objects.filter(region=region):
                     try:
-                        asyncio.run(app.bot.send_message(chat_id=user.chat_id, text='Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\n'
-                                     'Хуфтон вақти бўлди'
-                                     , reply_markup=reply_markup))
+
+                        text_me = 'Ассаламуалайкум ва роҳматуллоҳу ва баракату! \n\nХуфтон вақти бўлди'
+                        trio.run(self.sent_msg, user.chat_id, reply_markup, text_me)
+                 
                         qazo = user.qazo
                         qazo.xufton +=1
                         qazo.save()
                     except:
+                        print(user.username, 'falce')
+
                         user.is_active = False
                         user.save()
-                        
+
             
