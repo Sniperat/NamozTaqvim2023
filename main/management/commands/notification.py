@@ -6,7 +6,7 @@ import asyncio
 import trio
 import time
 current_time = datetime.now().time()
-
+print(current_time)
 class Command(BotBase):
 
     async def sent_msg(self, chat_id, reply_markup, text_me):
