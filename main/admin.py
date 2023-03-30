@@ -3,7 +3,7 @@ from .models import TelegramUserModel, RegionModel, TimeModel, QazoModel
 
 
 class DetailAdmin(admin.ModelAdmin):
-    list_display = ('chat_id', 'username', 'is_active',)
+    list_display = ('chat_id', 'username', 'full_name', 'is_active',)
     
 admin.site.register(TelegramUserModel, DetailAdmin)
 admin.site.register(RegionModel)
